@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #ffffff;
+}
+h1{
+    color: white;
+}
+.gallery-container {
+    text-align: center;
+    background: linear-gradient(90deg, #000000, #ef1111, GREEN);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gallery {
+    position: relative;
+    max-width: 700px;
+    margin: 30px auto;
+}
+
+#gallery-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Navigation Buttons */
+.nav-btn {
+    position: absolute;
+    /* Position buttons relative to the gallery */
+    top: 80%;
+    /* Center vertically */
+    transform: translateY(-50%);
+    /* Adjust for exact vertical centering */
+    background: linear-gradient(0deg, #aa8ec7, #2575fc);
+    /* Gradient background */
+    color: white;
+    /* White text color */
+    border: none;
+    /* Remove default border */
+    padding: 15px 20px;
+    /* Add padding for better clickability */
+    cursor: pointer;
+    /* Change cursor to pointer on hover */
+    border-radius: 20PX;
+    /* Make buttons circular */
+    font-size: 20px;
+    /* Increase font size */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    /* Add shadow for depth */
+    transition: all 0.3s ease;
+    /* Smooth transition for all properties */
+}
+
+/* Previous Button */
+#prev-btn {
+    left: 20px;
+    /* Position on the left side */
+}
+
+/* Next Button */
+#next-btn {
+    right: 20px;
+    /* Position on the right side */
+}
+
+/* Hover Effect */
+.nav-btn:hover {
+    background: linear-gradient(90deg, #000000, #d61111,rgb(52, 248, 30));
+    /* Reverse gradient on hover */
+    box-shadow: 0 10px 10px rgba(255, 239, 239, 0.3);
+    /* Increase shadow on hover */
+    transform: translateY(-50%) scale(1.1);
+    /* Slightly scale up on hover */
+}
+
+/* Active Effect (when button is clicked) */
+.nav-btn:active {
+    transform: translateY(-50%) scale(0.9);
+    /* Slightly scale down on click */
+}

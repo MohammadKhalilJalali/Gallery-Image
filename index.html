@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultimate Image Gallery</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a1a;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .gallery-container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      aspect-ratio: 1;
+      background: #333;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.03);
+      z-index: 2;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90vh;
+      margin: 2rem;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-image {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Navigation Controls */
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 1.5rem;
+      cursor: pointer;
+      border-radius: 50%;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .prev-btn {
+      left: 2rem;
+    }
+
+    .next-btn {
+      right: 2rem;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 25px;
+      color: white;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Caption Styles */
+    .caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+      color: white;
+      padding: 2rem 1rem 1rem;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    /* Loading Animation */
+    .loader {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 1001;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-btn {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="gallery-container">
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+
+  <div class="modal" id="imageModal">
+    <div class="loader" id="loader"></div>
+    <button class="close-btn" id="closeBtn">✕ Close</button>
+    <button class="nav-btn prev-btn" id="prevBtn">❮</button>
+    <button class="nav-btn next-btn" id="nextBtn">❯</button>
+    <div class="modal-content">
+      <img class="modal-image" id="modalImage" alt="Enlarged view">
+      <div class="caption" id="imageCaption"></div>
+    </div>
+  </div>
+
+  <script>
+    const galleryData = [
+      { src: './images/image1.jpg', caption: 'Majestic Natural Landscape' },
+      { src: './images/image2.jpg', caption: 'Modern Urban Architecture' },
+      { src: './images/image3.jpg', caption: 'Innovative Technology' },
+      { src: './images/image4.jpg', caption: 'Contemporary Art Masterpiece' },
+      { src: './images/image5.jpg', caption: 'Breathtaking Travel Destination' },
+      { src: './images/image6.jpg', caption: 'Gourmet Culinary Delight' },
+      { src: './images/image7.jpg', caption: 'Wildlife in Natural Habitat' },
+      { src: './images/image8.jpg', caption: 'Extreme Sports Action' }
+    ];
+
+    let currentIndex = 0;
+    const galleryGrid = document.getElementById('galleryGrid');
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const caption = document.getElementById('imageCaption');
+    const loader = document.getElementById('loader');
+
+    // Initialize gallery
+    function initGallery() {
+      galleryData.forEach((item, index) => {
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item';
+        galleryItem.innerHTML = `
+                    <img src="${item.src}" 
+                         alt="${item.caption}" 
+                         loading="lazy"
+                         data-index="${index}">
+                `;
+        galleryItem.addEventListener('click', () => openModal(index));
+        galleryGrid.appendChild(galleryItem);
+      });
+    }
+
+    // Modal controls
+    function openModal(index) {
+      currentIndex = index;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      loadImage(galleryData[currentIndex].src);
+      caption.textContent = galleryData[currentIndex].caption;
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    function navigate(direction) {
+      currentIndex = (currentIndex + direction + galleryData.length) % galleryData.length;
+      loadImage(galleryData[currentIndex].src);
+      caption.textContent = galleryData[currentIndex].caption;
+    }
+
+    // Image loading with loader
+    function loadImage(src) {
+      loader.style.display = 'block';
+      modalImage.style.opacity = '0';
+
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        modalImage.src = src;
+        modalImage.style.opacity = '1';
+        loader.style.display = 'none';
+      };
+      img.onerror = () => {
+        loader.style.display = 'none';
+        caption.textContent = 'Failed to load image';
+      };
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', initGallery);
+    document.getElementById('closeBtn').addEventListener('click', closeModal);
+    document.getElementById('prevBtn').addEventListener('click', () => navigate(-1));
+    document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (modal.classList.contains('active')) {
+        switch (e.key) {
+          case 'Escape': closeModal(); break;
+          case 'ArrowLeft': navigate(-1); break;
+          case 'ArrowRight': navigate(1); break;
+        }
+      }
+    });
+
+    // Click outside to close
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Smooth image transitions
+    modalImage.style.transition = 'opacity 0.3s ease';
+  </script>
+</body>
+
+</html>
